@@ -500,7 +500,7 @@ class SourceIGN(Source):
         try:
             return datetime.datetime.strptime(output[index+23:index+33], "%Y-%m-%d")
         except:
-            print ("Unable to get the millesime from %s" % self.fileUrl)
+            print("Unable to get the millesime from %s" % self.fileUrl)
             return None
 
 class Parser:
