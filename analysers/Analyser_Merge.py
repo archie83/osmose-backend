@@ -485,6 +485,23 @@ class SourceHttpLastModified(Source):
             downloader.HTTP_DATE_FMT,
         )
 
+class SourceIGN(Source):
+    """Get millesime from IGN BDTOPO MetaData"""
+    def get_millesime(self):
+        tmp_file = tempfile.NamedTemporaryFile(mode = 'wb', delete = False)
+        tmp_file.write(self.open(binary = True).read())
+        tmp_file.close()
+
+        # Fetch the millesime
+        ogrinfo = "ogrinfo -al -so '{}' ".format(tmp_file.name)
+        print(ogrinfo)
+        output = os.popen(ogrinfo).read()
+        index = output.find("DESCRIPTION=IGN BDTOPO ")
+        try:
+            return datetime.datetime.strptime(output[index+23:index+33], "%Y-%m-%d")
+        except:
+            print ("Unable to get the millesime from %s" % self.fileUrl)
+            return None
 
 class Parser:
     def header(self):
@@ -1148,7 +1165,7 @@ OpenData and OSM.'''))
             typeSelect = {'N': 'NULL', 'W': 'NULL', 'R': 'NULL'}
             typeGeom = {'N': 'NULL', 'W': 'NULL', 'R': 'NULL'}
             typeShape = {'N': 'NULL', 'W': 'NULL', 'R': 'NULL'}
-        self.logger.log(u"Retrive OSM item")
+        self.logger.log(u"Retrieve OSM item")
         where = Select.where_tags(self.conflate.select.tags)
         self.run("CREATE TEMP TABLE osm_item AS " +
             ("UNION ALL".join(
